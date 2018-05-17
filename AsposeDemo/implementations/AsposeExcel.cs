@@ -1,11 +1,15 @@
 ﻿#region Usings
 using Aspose.Cells;
+using Aspose.Cells.Drawing;
 using Aspose.Cells.Rendering;
 using System;
 using System.Data;
+using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
 using System.Windows;
+using System.Windows.Media.Imaging;
+using ZXing;
 using static System.Drawing.Printing.PrinterSettings;
 #endregion
 
@@ -121,62 +125,79 @@ namespace AsposeDemo
             FileStream stream = null;
             try
             {
+                string txtTransactionno1 = "AN11160002";
+                string filledBy = "KIT WAS USED FROM DATE 05 / 01 / 2018   TO DATE @tMonth / @tDay / @tYear";
                 string dataDir = System.IO.Directory.GetCurrentDirectory();
                 string fullFileName = dataDir + @"\templates\";
+                var date = System.DateTime.Now.ToString("MM-dd-yyyy");
 
-                stream = new FileStream(fullFileName + "Template.xlsx", FileMode.Open);
+                stream = new FileStream(fullFileName + FileName, FileMode.Open);
 
                 // Instantiate LoadOptions specified by the LoadFormat.
-                //LoadOptions loadOptions1 = new LoadOptions(LoadFormat.Excel97To2003);
+                LoadOptions loadOptions1 = new LoadOptions(LoadFormat.Excel97To2003);
 
                 // Create a Workbook object and opening the file from the stream
-                Workbook wb = new Workbook(stream);//, loadOptions1);
+                Workbook wb = FileName.EndsWith("xls") ? new Workbook(stream, loadOptions1) : new Workbook(stream);
                 wb.Worksheets[0].PageSetup.Orientation = PageOrientationType.Landscape;
+
+                TextBoxCollection textBoxes = wb.Worksheets[0].TextBoxes;
+                textBoxes["txtTransactionno1"].Text = txtTransactionno1;
+                textBoxes["txtTransactionno1"].Font.IsBold = true;
+
+                textBoxes["txthospitalname"].Text = "General Hospital";
+                textBoxes["txthospitalname"].Fill.FillType = FillType.Solid;
+                textBoxes["txthospitalname"].Fill.SolidFill.Color = Color.White;
+
+                textBoxes["txtsiteid"].Text = "San Diego, CA";
+                textBoxes["txtsiteid"].Fill.FillType = FillType.Solid;
+                textBoxes["txtsiteid"].Fill.SolidFill.Color = Color.White;
+
+                var picture = GenerateBarCode(txtTransactionno1, textBoxes["txtlocationidcoded"].Width - 15, textBoxes["txtlocationidcoded"].Height);
+                
+                wb.Worksheets[0].Pictures.Add(8, 0, picture);
+                
+                textBoxes["txtLocation"].Text = "LD1";
+                textBoxes["txtLocation"].Font.IsBold = true;
+                textBoxes["txttransactionno"].Text = txtTransactionno1;
+                textBoxes["txttransactionno"].Font.IsBold = true;
+
+                wb.Worksheets[0].Cells["B5"].Value = filledBy.Replace("@tMonth", date.Split('-')[0]).Replace("@tDay", date.Split('-')[1]).Replace("@tYear", date.Split('-')[2]);
 
                 DataTable data = GetData();
 
-                var column = 67; // Letter C in ASCII
-                var columnNumber = 3;
+                var column = 2;
                 foreach (DataRow dr in data.Rows)
                 {
-                    char columnChar = (char)column;
-                    Cell header = wb.Worksheets[0].Cells[string.Format("{0}{1}", columnChar, 17)];
+                    //char columnChar = (char)column;
+                    Cell header = wb.Worksheets[0].Cells[8, column];
                     Aspose.Cells.Style objstyle = header.GetStyle();
 
                     // Specify the angle of rotation of the text.
                     objstyle.RotationAngle = 60;
-                    objstyle.SetBorder(BorderType.BottomBorder, CellBorderType.Thin, System.Drawing.Color.Black);
-                    objstyle.SetBorder(BorderType.TopBorder, CellBorderType.Thin, System.Drawing.Color.Black);
-                    objstyle.SetBorder(BorderType.LeftBorder, CellBorderType.Thin, System.Drawing.Color.Black);
-                    objstyle.SetBorder(BorderType.RightBorder, CellBorderType.Thin, System.Drawing.Color.Black);
+                    objstyle.Font.Size = 10;
+                    objstyle.SetBorder(BorderType.LeftBorder, CellBorderType.Thin, Color.Black);
                     header.PutValue(dr[0]);
-                    objstyle.Pattern = BackgroundType.Solid;
                     header.SetStyle(objstyle);
 
-                    Cell cell = wb.Worksheets[0].Cells[string.Format("{0}{1}", columnChar, 18)];
+                    Cell cell = wb.Worksheets[0].Cells[9, column];
                     Aspose.Cells.Style cellStyle = cell.GetStyle();
 
-                    cellStyle.SetBorder(BorderType.BottomBorder, CellBorderType.Thin, System.Drawing.Color.Black);
-                    cellStyle.SetBorder(BorderType.TopBorder, CellBorderType.Thin, System.Drawing.Color.Black);
-                    cellStyle.SetBorder(BorderType.LeftBorder, CellBorderType.Thin, System.Drawing.Color.Black);
-                    cellStyle.SetBorder(BorderType.RightBorder, CellBorderType.Thin, System.Drawing.Color.Black);
                     cell.PutValue(dr[1]);
                     cell.SetStyle(cellStyle);
 
-                    wb.Worksheets[0].AutoFitColumn(columnNumber);
-
-                    column++;
-                    columnNumber++;
+                    column+=4;
                 }
 
-                for (var i = 2; i <= data.Rows.Count; i++)
-                    wb.Worksheets[0].Cells.SetColumnWidth(i, 4);
-
-                wb.Worksheets[0].AutoFitRows(true);
                 //Save the Shared Workbook
                 wb.Save(fullFileName + "report.xlsx");
                 MessageBox.Show(owner, "Report has been created successfully.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                PrintFile(owner, fullFileName + "report.xlsx");
+
+                ExcelViewer ev = new ExcelViewer(ConvertSheetToImage(wb.Worksheets[0]));
+                ev.Closed += (object sender, EventArgs e) =>
+                {
+                    PrintFile(owner, fullFileName + "report.xlsx");
+                };
+                ev.Show();
             }
             catch (Exception ex)
             {
@@ -213,6 +234,52 @@ namespace AsposeDemo
             _dt.Rows.Add(new Object[] { "Versed 25MG/ML", 7 });
 
             return _dt;
+        }
+
+        private Stream GenerateBarCode(string value, int width, int height)
+        {
+            var writer = new BarcodeWriter
+            {
+                Format = BarcodeFormat.CODE_39,
+                Options = new ZXing.Common.EncodingOptions
+                {
+                    Height = height,
+                    Width = width,
+                    Margin = 1,
+                    PureBarcode = true
+                }
+            };
+            var bitmap = writer.Write(value);
+            return GetStreamFromBitmap(bitmap);
+        }
+
+        private Stream GetStreamFromBitmap(Bitmap bitmapImage)
+        {
+            MemoryStream memStream = null;
+            try
+            {
+                memStream = new MemoryStream();
+                bitmapImage.Save(memStream, System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+            catch (Exception ex)
+            {
+                ;
+            }
+            return memStream;
+        }
+
+        private Bitmap ConvertSheetToImage(Worksheet sheet)
+        {
+            // Apply different Image/Print options.
+            ImageOrPrintOptions options = new Aspose.Cells.Rendering.ImageOrPrintOptions();
+            options.ImageFormat = System.Drawing.Imaging.ImageFormat.Png;
+            options.PrintingPage = PrintingPageType.Default;
+
+            SheetRender sr = new Aspose.Cells.Rendering.SheetRender(sheet, options);
+
+            Bitmap bitmap = sr.ToImage(0);
+
+            return bitmap;
         }
     }
 }

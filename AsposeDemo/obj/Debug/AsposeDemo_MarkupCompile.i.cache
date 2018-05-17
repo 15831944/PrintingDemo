@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\jose.mendoza\source\repos\PrintingReport\AsposeDemo\obj\Debug\
+C:\github\PrintingDemo\AsposeDemo\obj\Debug\
 AsposeDemo
 none
 false
 DEBUG;TRACE
-C:\Users\jose.mendoza\source\repos\PrintingReport\AsposeDemo\App.xaml
-5-973404878
+C:\github\PrintingDemo\AsposeDemo\App.xaml
+61440038491
 
-171458040930
-231266473527
-BuildReport.xaml;CreateNewFile.xaml;ExcelViewer.xaml;MainWindow.xaml;PrintExistingFile.xaml;
+19-74361443
+25-1846657385
+AsposeReport.xaml;BuildReport.xaml;CreateNewFile.xaml;ExcelViewer.xaml;MainWindow.xaml;PrintExistingFile.xaml;
 
-True
+False
 

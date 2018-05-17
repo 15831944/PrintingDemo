@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("packages/aspose.cells.dll")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("print.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("report.ico")]
 
 
