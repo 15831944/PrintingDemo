@@ -52,11 +52,25 @@ namespace AsposeDemo
         private void cmbTemplates_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             getExcelInstance().FileName = templates[cmbTemplates.SelectedItem.ToString()];
+            getExcelInstance().FileFormatExtension = cmbTemplates.SelectedItem.ToString();
         }
 
         private void cmbPrinters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             getExcelInstance().PrinterName = cmbPrinters.SelectedItem.ToString();
+        }
+
+        private void btnViewTimes_Click(object sender, RoutedEventArgs e)
+        {
+            var times = ((AsposeExcel)getExcelInstance()).TimesElapsed;
+
+            if (times.Count >= 0)
+            {
+                TimesOfProcessing top = new TimesOfProcessing(times);
+                top.Show();
+            }
+            else
+                MessageBox.Show(this, "No times have been recorded yet", "Atention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
     }
 }

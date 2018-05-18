@@ -6,6 +6,7 @@ namespace AsposeDemo
     public interface IExcelProcessor
     {
         string FileName { get; set; }
+        string FileFormatExtension { get; set; }
         string PrinterName { get; set; }
 
         StringCollection GetAvailablePrinters();

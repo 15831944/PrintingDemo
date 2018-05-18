@@ -12,6 +12,7 @@
         <Label Content="Template:" HorizontalAlignment="Left" Margin="40,36,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbPrinters" HorizontalAlignment="Left" Margin="126,64,0,0" VerticalAlignment="Top" Width="164" SelectionChanged="cmbPrinters_SelectionChanged"/>
         <ComboBox Name="cmbTemplates" HorizontalAlignment="Left" Margin="126,36,0,0" VerticalAlignment="Top" Width="164" SelectionChanged="cmbTemplates_SelectionChanged"/>
+        <Button Name="btnViewTimes" Content="View Times" HorizontalAlignment="Left" Margin="147,112,0,0" VerticalAlignment="Top" Width="75" Click="btnViewTimes_Click"/>
 
     </Grid>
 </Window>

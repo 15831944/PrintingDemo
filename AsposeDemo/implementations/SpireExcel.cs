@@ -13,6 +13,7 @@ namespace AsposeDemo.implementations
     public class SpireExcel : IExcelProcessor
     {
         public string FileName { get; set; }
+        public string FileFormatExtension { get; set; }
         public string PrinterName { get; set; }
 
         public void BuildReport(Window owner)

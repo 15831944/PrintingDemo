@@ -13,6 +13,7 @@ namespace AsposeDemo.implementations
     {
         private ExcelFile _ef { get; set; }
         public string FileName { get; set; }
+        public string FileFormatExtension { get; set; }
         public string PrinterName { get; set; }
 
         public void BuildReport(Window owner)

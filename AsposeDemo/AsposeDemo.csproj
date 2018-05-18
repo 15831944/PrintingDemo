@@ -122,12 +122,19 @@
     <Compile Include="implementations\AsposeExcel.cs" />
     <Compile Include="implementations\GemboxSpreadSheetExcel.cs" />
     <Compile Include="implementations\SpireExcel.cs" />
+    <Compile Include="TimesOfProcessing.xaml.cs">
+      <DependentUpon>TimesOfProcessing.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ZoomBorder.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="PrintExistingFile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TimesOfProcessing.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,0 +1,13 @@
+﻿<Window x:Class="AsposeDemo.TimesOfProcessing"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AsposeDemo"
+        mc:Ignorable="d"
+        Title="Times of Processing" Height="544.737" Width="400.752">
+    <Grid>
+        <DataGrid Name="dtgTimes" HorizontalAlignment="Left" Height="494" VerticalAlignment="Top" Width="366" Margin="10,10,0,0"/>
+
+    </Grid>
+</Window>

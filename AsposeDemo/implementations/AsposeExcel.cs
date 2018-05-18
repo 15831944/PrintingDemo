@@ -2,6 +2,7 @@
 using Aspose.Cells;
 using Aspose.Cells.Drawing;
 using Aspose.Cells.Rendering;
+using System.Diagnostics;
 using System;
 using System.Data;
 using System.Drawing;
@@ -11,6 +12,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using ZXing;
 using static System.Drawing.Printing.PrinterSettings;
+using System.Collections.Generic;
 #endregion
 
 namespace AsposeDemo
@@ -20,6 +22,9 @@ namespace AsposeDemo
         #region Variables
         public string FileName { get; set; }
         public string PrinterName { get; set; }
+        public string FileFormatExtension { get; set; }
+
+        public Dictionary<string, List<string>> TimesElapsed = new Dictionary<string, List<string>>(); 
         #endregion
 
         public void PrintFile(Window owner, string fullFileName)
@@ -116,6 +121,8 @@ namespace AsposeDemo
 
         public void BuildReport(Window owner)
         {
+            Stopwatch myTimer = new Stopwatch();
+
             if (string.IsNullOrEmpty(PrinterName) && string.IsNullOrWhiteSpace(PrinterName))
             {
                 MessageBox.Show(owner, "Please select your printer name.", "Atention", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -130,6 +137,9 @@ namespace AsposeDemo
                 string dataDir = System.IO.Directory.GetCurrentDirectory();
                 string fullFileName = dataDir + @"\templates\";
                 var date = System.DateTime.Now.ToString("MM-dd-yyyy");
+                var isOldExcel = FileName.EndsWith("xls");
+
+                myTimer.Start();
 
                 stream = new FileStream(fullFileName + FileName, FileMode.Open);
 
@@ -137,7 +147,7 @@ namespace AsposeDemo
                 LoadOptions loadOptions1 = new LoadOptions(LoadFormat.Excel97To2003);
 
                 // Create a Workbook object and opening the file from the stream
-                Workbook wb = FileName.EndsWith("xls") ? new Workbook(stream, loadOptions1) : new Workbook(stream);
+                Workbook wb = isOldExcel ? new Workbook(stream, loadOptions1) : new Workbook(stream);
                 wb.Worksheets[0].PageSetup.Orientation = PageOrientationType.Landscape;
 
                 TextBoxCollection textBoxes = wb.Worksheets[0].TextBoxes;
@@ -152,7 +162,7 @@ namespace AsposeDemo
                 textBoxes["txtsiteid"].Fill.FillType = FillType.Solid;
                 textBoxes["txtsiteid"].Fill.SolidFill.Color = Color.White;
 
-                var picture = GenerateBarCode(txtTransactionno1, textBoxes["txtlocationidcoded"].Width - 15, textBoxes["txtlocationidcoded"].Height);
+                var picture = GenerateBarCode(txtTransactionno1, textBoxes["txtlocationidcoded"].Width - 25, textBoxes["txtlocationidcoded"].Height);
                 
                 wb.Worksheets[0].Pictures.Add(8, 0, picture);
                 
@@ -189,13 +199,20 @@ namespace AsposeDemo
                 }
 
                 //Save the Shared Workbook
-                wb.Save(fullFileName + "report.xlsx");
-                MessageBox.Show(owner, "Report has been created successfully.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (isOldExcel)
+                    wb.Save(fullFileName + "report.xls", SaveFormat.Excel97To2003);
+                else
+                    wb.Save(fullFileName + "report.xlsx", SaveFormat.Xlsx);
+
+                myTimer.Stop();
+                AddTimeElapsed(FileFormatExtension, myTimer.Elapsed.ToString());
+
+                MessageBox.Show(owner, string.Format("Report has been created successfully."), "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 ExcelViewer ev = new ExcelViewer(ConvertSheetToImage(wb.Worksheets[0]));
                 ev.Closed += (object sender, EventArgs e) =>
                 {
-                    PrintFile(owner, fullFileName + "report.xlsx");
+                    PrintFile(owner, fullFileName + (isOldExcel ? "report.xls" : "report.xlsx"));
                 };
                 ev.Show();
             }
@@ -280,6 +297,23 @@ namespace AsposeDemo
             Bitmap bitmap = sr.ToImage(0);
 
             return bitmap;
+        }
+
+        private void AddTimeElapsed(string key, string value)
+        {
+            if (TimesElapsed.ContainsKey(key))
+            {
+                List<string> values = null;
+
+                TimesElapsed.TryGetValue(key, out values);
+                values.Add(value);
+                TimesElapsed[key] = values;
+            } else
+            {
+                List<string> values = new List<string>();
+                values.Add(value);
+                TimesElapsed.Add(key, values);
+            }
         }
     }
 }
