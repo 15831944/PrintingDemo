@@ -23,6 +23,7 @@ namespace AsposeDemo
         public string FileName { get; set; }
         public string PrinterName { get; set; }
         public string FileFormatExtension { get; set; }
+        private bool Convert2Pdf { get; set; }
 
         public Dictionary<string, List<string>> TimesElapsed = new Dictionary<string, List<string>>(); 
         #endregion
@@ -162,8 +163,8 @@ namespace AsposeDemo
                 textBoxes["txtsiteid"].Fill.FillType = FillType.Solid;
                 textBoxes["txtsiteid"].Fill.SolidFill.Color = Color.White;
 
-                var picture = GenerateBarCode(txtTransactionno1, textBoxes["txtlocationidcoded"].Width - 25, textBoxes["txtlocationidcoded"].Height);
-                
+                var picture = GenerateBarCode(txtTransactionno1, 247, 38);
+
                 wb.Worksheets[0].Pictures.Add(8, 0, picture);
                 
                 textBoxes["txtLocation"].Text = "LD1";
@@ -175,7 +176,7 @@ namespace AsposeDemo
 
                 DataTable data = GetData();
 
-                var column = 2;
+                var column = 3;
                 foreach (DataRow dr in data.Rows)
                 {
                     //char columnChar = (char)column;
@@ -183,18 +184,15 @@ namespace AsposeDemo
                     Aspose.Cells.Style objstyle = header.GetStyle();
 
                     // Specify the angle of rotation of the text.
-                    objstyle.RotationAngle = 60;
+                    //objstyle.RotationAngle = 60;
                     objstyle.Font.Size = 10;
-                    objstyle.SetBorder(BorderType.LeftBorder, CellBorderType.Thin, Color.Black);
+                    //objstyle.SetBorder(BorderType.LeftBorder, CellBorderType.Thin, Color.Black);
                     header.PutValue(dr[0]);
                     header.SetStyle(objstyle);
 
-                    Cell cell = wb.Worksheets[0].Cells[9, column];
-                    Aspose.Cells.Style cellStyle = cell.GetStyle();
+                    Cell cell = wb.Worksheets[0].Cells[9, column - 1];
 
                     cell.PutValue(dr[1]);
-                    cell.SetStyle(cellStyle);
-
                     column+=4;
                 }
 
@@ -207,14 +205,23 @@ namespace AsposeDemo
                 myTimer.Stop();
                 AddTimeElapsed(FileFormatExtension, myTimer.Elapsed.ToString());
 
-                MessageBox.Show(owner, string.Format("Report has been created successfully."), "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                ExcelViewer ev = new ExcelViewer(ConvertSheetToImage(wb.Worksheets[0]));
-                ev.Closed += (object sender, EventArgs e) =>
+                if (Convert2Pdf)
                 {
-                    PrintFile(owner, fullFileName + (isOldExcel ? "report.xls" : "report.xlsx"));
-                };
-                ev.Show();
+                    wb.Save(fullFileName + "report.pdf", SaveFormat.Pdf);
+                    System.Diagnostics.Process.Start(fullFileName + "report.pdf");
+                    Convert2Pdf = false;
+                }
+                else
+                {
+                    MessageBox.Show(owner, string.Format("Report has been created successfully."), "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    ExcelViewer ev = new ExcelViewer(ConvertSheetToImage(wb.Worksheets[0]));
+                    ev.Closed += (object sender, EventArgs e) =>
+                    {
+                        PrintFile(owner, fullFileName + (isOldExcel ? "report.xls" : "report.xlsx"));
+                    };
+                    ev.Show();
+                }
             }
             catch (Exception ex)
             {
@@ -230,6 +237,21 @@ namespace AsposeDemo
         public StringCollection  GetAvailablePrinters()
         {
             return PrinterSettings.InstalledPrinters;
+        }
+
+        public void GetPdf(Window owner)
+        {
+            try
+            {
+                Convert2Pdf = true;
+                BuildReport(owner);
+                MessageBox.Show(owner, string.Format("PDF Report has been created successfully."), "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(owner, string.Format("An error has occurred while creating PDF document: {0}", ex.Message), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Convert2Pdf = false;
+            }
         }
 
         private DataTable GetData()

@@ -72,5 +72,10 @@ namespace AsposeDemo
             else
                 MessageBox.Show(this, "No times have been recorded yet", "Atention", MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
+
+        private void btnGetPdf_Click(object sender, RoutedEventArgs e)
+        {
+            getExcelInstance().GetPdf(this);
+        }
     }
 }

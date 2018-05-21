@@ -185,5 +185,10 @@ namespace AsposeDemo.implementations
             else
                 return FileFormat.Version2013;
         }
+
+        public void GetPdf(Window owner)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

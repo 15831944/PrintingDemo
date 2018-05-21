@@ -86,4 +86,3 @@ C:\github\PrintingDemo\AsposeDemo\obj\Debug\AsposeDemo.csproj.CoreCompileInputs.
 C:\github\PrintingDemo\AsposeDemo\obj\Debug\AsposeDemo.csproj.CopyComplete
 C:\github\PrintingDemo\AsposeDemo\obj\Debug\AsposeDemo.exe
 C:\github\PrintingDemo\AsposeDemo\obj\Debug\AsposeDemo.pdb
-C:\github\PrintingDemo\AsposeDemo\obj\Debug\AsposeDemo.csprojAssemblyReference.cache

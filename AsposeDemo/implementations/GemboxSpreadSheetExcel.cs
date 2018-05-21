@@ -202,5 +202,10 @@ namespace AsposeDemo.implementations
                 System.Windows.MessageBox.Show(owner, string.Format("An error has occurred while creating document: {0}", ex.Message), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public void GetPdf(Window owner)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

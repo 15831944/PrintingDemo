@@ -13,5 +13,6 @@ namespace AsposeDemo
         void PrintFile(Window owner, string fullFileName);
         void CreateFile(Window owner);
         void BuildReport(Window owner);
+        void GetPdf(Window owner);
     }
 }
